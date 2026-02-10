@@ -1,6 +1,6 @@
-# Smriti
-
-**Shared memory for AI-powered engineering teams.**
+<p align="center">
+  <img src="assets/banner.png" alt="Smriti — Shared memory for AI-powered engineering teams" width="600" />
+</p>
 
 Built on top of [QMD](https://github.com/tobi/qmd) by Tobi Lütke.
 
