@@ -8,19 +8,30 @@ Built on top of [QMD](https://github.com/tobi/qmd) by Tobi Lütke.
 
 ## The Problem
 
-Your team ships code with AI agents every day. Claude Code, Cursor, Codex — everyone has their own conversations, their own context, their own decisions buried in chat logs that nobody else can see.
+Your team ships code with AI agents every day — Claude Code, Cursor, Codex. But every agent has a blind spot:
 
-Monday morning: your teammate spent three hours with Claude working through a tricky auth migration. Tuesday: you start a fresh session, ask the same questions, make the same mistakes, and arrive at a slightly different solution. The agent that helped your teammate yesterday has no idea it happened. Your agent has no idea either.
+> **They don't remember anything.** Not from yesterday. Not from each other. Not from your teammates.
 
-**Every AI session starts from zero.** There is no shared memory. No way for one agent to know what another figured out last week. No way for your Tuesday session to build on Monday's breakthroughs. Decisions, context, debugging insights, architectural choices — all of it evaporates the moment the conversation ends.
+Here's what that looks like:
 
-This is the biggest gap in AI-assisted development today. The agents are brilliant, but they're amnesic.
+| Monday | Tuesday |
+|--------|---------|
+| Your teammate spends 3 hours with Claude on an auth migration | You open a fresh session and ask the same questions |
+| Claude figures out the right approach, makes key decisions | Your Claude has no idea any of that happened |
+| Architectural insights, debugging breakthroughs, trade-offs | All of it — gone |
+
+The result:
+- **Duplicated work** — same questions asked across the team, different answers every time
+- **Lost decisions** — "why did we do it this way?" lives in someone's closed chat window
+- **Zero continuity** — each session starts from scratch, no matter how much your team has already figured out
+
+The agents are brilliant. But they're amnesic. **This is the biggest gap in AI-assisted development today.**
 
 ## What Smriti Does
 
-Smriti (Sanskrit: *memory*) gives your team a shared memory layer that sits underneath all your AI agents.
+**Smriti** (Sanskrit: *memory*) is a shared memory layer that sits underneath all your AI agents.
 
-Every conversation with every agent is automatically captured, indexed, and made searchable. When you start a new session, you can pull in exactly the context that matters — what was decided, what was tried, what worked — in a single command.
+Every conversation &rarr; automatically captured &rarr; indexed &rarr; searchable. One command to recall what matters.
 
 ```bash
 # What did we figure out about the auth migration?
@@ -33,7 +44,7 @@ smriti list --project myapp
 smriti search "rate limiting strategy" --project api-service
 ```
 
-Instead of pasting 20,000 tokens of old conversations into your prompt, Smriti retrieves the 500 tokens that actually matter. Your agents get the context they need without blowing up your token budget.
+> **20,000 tokens** of past conversations &rarr; **500 tokens** of relevant context. Your agents get what they need without blowing up your token budget.
 
 ## The Workflow
 
