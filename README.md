@@ -1,6 +1,8 @@
 # Smriti
 
-**Shared memory for AI-powered engineering teams.** v1
+**Shared memory for AI-powered engineering teams.**
+
+Built on top of [QMD](https://github.com/tobi/qmd) by Tobi Lütke.
 
 ---
 
@@ -198,6 +200,14 @@ To also remove hook state: `SMRITI_PURGE=1` before the command.
 ## Documentation
 
 See [CLAUDE.md](./CLAUDE.md) for the full reference — API docs, database schema, architecture details, and troubleshooting.
+
+## Special Thanks
+
+Smriti is built on top of [QMD](https://github.com/tobi/qmd) — a beautifully designed local search engine for markdown files created by [Tobi Lütke](https://github.com/tobi), CEO of Shopify.
+
+QMD gave us the foundation we needed: a fast, local-first SQLite store with full-text search, vector embeddings, and content-addressable hashing — all running on your machine with zero cloud dependencies. Instead of rebuilding that infrastructure from scratch, we were able to focus entirely on the memory layer, multi-agent ingestion, and team sharing that makes Smriti useful.
+
+Thank you, Tobi, for open-sourcing QMD. It's a reminder that the best tools are often the ones that quietly do the hard work so others can build something new on top.
 
 ## License
 
