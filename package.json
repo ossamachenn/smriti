@@ -1,0 +1,22 @@
+{
+  "name": "smriti",
+  "version": "0.2.0",
+  "description": "Smriti - Unified memory layer across all AI agents",
+  "type": "module",
+  "bin": {
+    "smriti": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "test": "bun test",
+    "smriti": "bun src/index.ts"
+  },
+  "dependencies": {
+    "node-llama-cpp": "^3.0.0",
+    "qmd": "github:zero8dotdev/qmd"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

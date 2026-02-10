@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.bun
+bun.lockb
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# Cache
+.cache/
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Temporary
+.tmp/
+temp/
