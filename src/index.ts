@@ -122,6 +122,8 @@ Share options:
   --output <dir>               Custom output directory
   --no-reflect                 Skip LLM reflections (on by default)
   --reflect-model <name>       Ollama model for reflections
+  --segmented                  Use 3-stage segmentation pipeline (beta)
+  --min-relevance <float>      Relevance threshold for segmented mode (default: 6)
 
 Examples:
   smriti ingest claude
@@ -130,6 +132,7 @@ Examples:
   smriti categorize
   smriti list --category decision --project myapp
   smriti share --category decision
+  smriti share --project myapp --segmented --min-relevance 7
   smriti sync
 `;
 
@@ -404,6 +407,8 @@ async function main() {
           outputDir: getArg(args, "--output"),
           reflect: !hasFlag(args, "--no-reflect"),
           reflectModel: getArg(args, "--reflect-model"),
+          segmented: hasFlag(args, "--segmented"),
+          minRelevance: Number(getArg(args, "--min-relevance")) || undefined,
         });
 
         console.log(formatShareResult(result));

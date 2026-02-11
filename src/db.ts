@@ -38,6 +38,28 @@ export function closeDb(): void {
 
 /** Create all Smriti tables if they don't exist */
 export function initializeSmritiTables(db: Database): void {
+  // Add columns to smriti_shares if they don't exist (migration)
+  try {
+    db.exec(`ALTER TABLE smriti_shares ADD COLUMN unit_id TEXT`);
+  } catch {
+    // Column already exists or table not created yet
+  }
+  try {
+    db.exec(`ALTER TABLE smriti_shares ADD COLUMN unit_sequence INTEGER DEFAULT 0`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec(`ALTER TABLE smriti_shares ADD COLUMN relevance_score REAL`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec(`ALTER TABLE smriti_shares ADD COLUMN entities TEXT`);
+  } catch {
+    // Column already exists
+  }
+
   db.exec(`
     -- Agent registry
     CREATE TABLE IF NOT EXISTS smriti_agents (
@@ -104,7 +126,11 @@ export function initializeSmritiTables(db: Database): void {
       project_id TEXT,
       author TEXT,
       shared_at TEXT NOT NULL DEFAULT (datetime('now')),
-      content_hash TEXT
+      content_hash TEXT,
+      unit_id TEXT,
+      unit_sequence INTEGER DEFAULT 0,
+      relevance_score REAL,
+      entities TEXT
     );
 
     -- Tool usage tracking
@@ -189,6 +215,8 @@ export function initializeSmritiTables(db: Database): void {
       ON smriti_session_tags(category_id);
     CREATE INDEX IF NOT EXISTS idx_smriti_shares_hash
       ON smriti_shares(content_hash);
+    CREATE INDEX IF NOT EXISTS idx_smriti_shares_unit
+      ON smriti_shares(content_hash, unit_id);
 
     -- Indexes (sidecar tables)
     CREATE INDEX IF NOT EXISTS idx_smriti_tool_usage_session
