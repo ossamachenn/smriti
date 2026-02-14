@@ -41,6 +41,33 @@ export function closeDb(): void {
 
 /** Create all Smriti tables if they don't exist */
 export function initializeSmritiTables(db: Database): void {
+  // Migrate: Add columns to smriti_projects (language detection)
+  try {
+    db.exec(`ALTER TABLE smriti_projects ADD COLUMN language TEXT`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec(`ALTER TABLE smriti_projects ADD COLUMN framework TEXT`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec(`ALTER TABLE smriti_projects ADD COLUMN language_version TEXT`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec(`ALTER TABLE smriti_projects ADD COLUMN detected_at TEXT`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec(`ALTER TABLE smriti_projects ADD COLUMN rule_version TEXT DEFAULT '1.0.0'`);
+  } catch {
+    // Column already exists
+  }
+
   // Add columns to smriti_shares if they don't exist (migration)
   try {
     db.exec(`ALTER TABLE smriti_shares ADD COLUMN unit_id TEXT`);
@@ -207,6 +234,16 @@ export function initializeSmritiTables(db: Database): void {
       created_at TEXT NOT NULL
     );
 
+    -- Rule cache (fetched from GitHub)
+    CREATE TABLE IF NOT EXISTS smriti_rule_cache (
+      language TEXT NOT NULL,
+      version TEXT NOT NULL,
+      framework TEXT,
+      fetched_at TEXT NOT NULL,
+      rules_yaml TEXT NOT NULL,
+      PRIMARY KEY (language, version, framework)
+    );
+
     -- Indexes (original)
     CREATE INDEX IF NOT EXISTS idx_smriti_session_meta_agent
       ON smriti_session_meta(agent_id);
@@ -242,6 +279,8 @@ export function initializeSmritiTables(db: Database): void {
       ON smriti_git_operations(session_id);
     CREATE INDEX IF NOT EXISTS idx_smriti_git_operations_op
       ON smriti_git_operations(operation);
+    CREATE INDEX IF NOT EXISTS idx_smriti_rule_cache_language
+      ON smriti_rule_cache(language);
   `);
 }
 
@@ -364,14 +403,33 @@ export function upsertProject(
   db: Database,
   id: string,
   path?: string,
-  description?: string
+  description?: string,
+  language?: string,
+  framework?: string,
+  languageVersion?: string,
+  ruleVersion?: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_projects (id, path, description) VALUES (?, ?, ?)
+    `INSERT INTO smriti_projects (id, path, description, language, framework, language_version, rule_version, detected_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        path = COALESCE(excluded.path, path),
-       description = COALESCE(excluded.description, description)`
-  ).run(id, path || null, description || null);
+       description = COALESCE(excluded.description, description),
+       language = COALESCE(excluded.language, language),
+       framework = COALESCE(excluded.framework, framework),
+       language_version = COALESCE(excluded.language_version, language_version),
+       rule_version = COALESCE(excluded.rule_version, rule_version),
+       detected_at = COALESCE(excluded.detected_at, detected_at)`
+  ).run(
+    id,
+    path || null,
+    description || null,
+    language || null,
+    framework || null,
+    languageVersion || null,
+    ruleVersion || "1.0.0",
+    new Date().toISOString()
+  );
 }
 
 export function upsertSessionMeta(

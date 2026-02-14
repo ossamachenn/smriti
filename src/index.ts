@@ -585,6 +585,65 @@ async function main() {
       }
 
       // =====================================================================
+      // INIT (Project initialization with language detection)
+      // =====================================================================
+      case "init": {
+        const projectPath = args[1] || process.cwd();
+        const forceDetection = hasFlag(args, "--force");
+        const overrideLanguage = getArg(args, "--language");
+        const dryRun = hasFlag(args, "--dry-run");
+
+        console.log(`Initializing Smriti for project: ${projectPath}`);
+
+        // TODO: Implement in Phase 1 completion
+        console.log("(This feature is coming in Phase 1 completion)");
+        break;
+      }
+
+      // =====================================================================
+      // RULES (Rule management)
+      // =====================================================================
+      case "rules": {
+        const subcommand = args[1];
+
+        if (!subcommand || subcommand === "list") {
+          // TODO: Implement in Phase 1 completion
+          console.log("Available rules: (coming soon)");
+          break;
+        } else if (subcommand === "add") {
+          const id = args[2];
+          const pattern = args[3];
+          const category = args[4];
+
+          if (!id || !pattern || !category) {
+            console.error(
+              "Usage: smriti rules add <id> <pattern> <category> [--weight <w>] [--description <desc>]"
+            );
+            process.exit(1);
+          }
+
+          // TODO: Implement in Phase 1 completion
+          console.log("(This feature is coming in Phase 1 completion)");
+          break;
+        } else if (subcommand === "validate") {
+          const filePath = args[2] || ".smriti/rules/custom.yml";
+
+          // TODO: Implement in Phase 1 completion
+          console.log(`Validating rules from ${filePath}...`);
+          console.log("(This feature is coming in Phase 1 completion)");
+          break;
+        } else if (subcommand === "update") {
+          // TODO: Implement in Phase 1 completion
+          console.log("Checking for rule updates...");
+          console.log("(This feature is coming in Phase 1 completion)");
+          break;
+        } else {
+          console.error("Unknown rules subcommand. Use: list, add, validate, update");
+          process.exit(1);
+        }
+      }
+
+      // =====================================================================
       // UNKNOWN
       // =====================================================================
       default:
