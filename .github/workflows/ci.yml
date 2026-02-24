@@ -30,4 +30,7 @@ jobs:
         run: bun install
 
       - name: Run tests
-        run: bun test
+        # We only run tests in the smriti/test directory.
+        # qmd/ tests are skipped here as they are part of the backbone submodule
+        # and may have heavy dependencies (like local LLMs) that the runner lacks.
+        run: bun test test/
