@@ -12,6 +12,10 @@ bun.lockb
 .cache/
 dist/
 build/
+website/.next/
+website/out/
+website/node_modules/
+website/.turbo/
 
 # Logs
 *.log

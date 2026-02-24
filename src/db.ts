@@ -90,6 +90,35 @@ export function initializeSmritiTables(db: Database): void {
     // Column already exists
   }
 
+  // Migrate smriti_session_costs: change PK from (session_id) to (session_id, model)
+  try {
+    const hasOldSchema = db
+      .prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='smriti_session_costs'`)
+      .get() as { sql: string } | null;
+    if (hasOldSchema?.sql && hasOldSchema.sql.includes("session_id TEXT PRIMARY KEY")) {
+      db.exec(`
+        ALTER TABLE smriti_session_costs RENAME TO _smriti_session_costs_old;
+        CREATE TABLE smriti_session_costs (
+          session_id TEXT NOT NULL,
+          model TEXT NOT NULL DEFAULT 'unknown',
+          total_input_tokens INTEGER DEFAULT 0,
+          total_output_tokens INTEGER DEFAULT 0,
+          total_cache_tokens INTEGER DEFAULT 0,
+          estimated_cost_usd REAL DEFAULT 0,
+          turn_count INTEGER DEFAULT 0,
+          total_duration_ms INTEGER DEFAULT 0,
+          PRIMARY KEY (session_id, model)
+        );
+        INSERT INTO smriti_session_costs (session_id, model, total_input_tokens, total_output_tokens, total_cache_tokens, estimated_cost_usd, turn_count, total_duration_ms)
+          SELECT session_id, COALESCE(model, 'unknown'), total_input_tokens, total_output_tokens, total_cache_tokens, estimated_cost_usd, turn_count, total_duration_ms
+          FROM _smriti_session_costs_old;
+        DROP TABLE _smriti_session_costs_old;
+      `);
+    }
+  } catch {
+    // Table doesn't exist yet or already migrated
+  }
+
   db.exec(`
     -- Agent registry
     CREATE TABLE IF NOT EXISTS smriti_agents (
@@ -209,16 +238,17 @@ export function initializeSmritiTables(db: Database): void {
       created_at TEXT NOT NULL
     );
 
-    -- Token/cost tracking per session
+    -- Token/cost tracking per session per model
     CREATE TABLE IF NOT EXISTS smriti_session_costs (
-      session_id TEXT PRIMARY KEY,
-      model TEXT,
+      session_id TEXT NOT NULL,
+      model TEXT NOT NULL DEFAULT 'unknown',
       total_input_tokens INTEGER DEFAULT 0,
       total_output_tokens INTEGER DEFAULT 0,
       total_cache_tokens INTEGER DEFAULT 0,
       estimated_cost_usd REAL DEFAULT 0,
       turn_count INTEGER DEFAULT 0,
-      total_duration_ms INTEGER DEFAULT 0
+      total_duration_ms INTEGER DEFAULT 0,
+      PRIMARY KEY (session_id, model)
     );
 
     -- Git operation tracking
@@ -618,14 +648,13 @@ export function upsertSessionCosts(
   db.prepare(
     `INSERT INTO smriti_session_costs (session_id, model, total_input_tokens, total_output_tokens, total_cache_tokens, turn_count, total_duration_ms)
      VALUES (?, ?, ?, ?, ?, 1, ?)
-     ON CONFLICT(session_id) DO UPDATE SET
-       model = COALESCE(excluded.model, model),
+     ON CONFLICT(session_id, model) DO UPDATE SET
        total_input_tokens = total_input_tokens + excluded.total_input_tokens,
        total_output_tokens = total_output_tokens + excluded.total_output_tokens,
        total_cache_tokens = total_cache_tokens + excluded.total_cache_tokens,
        turn_count = turn_count + 1,
        total_duration_ms = total_duration_ms + excluded.total_duration_ms`
-  ).run(sessionId, model, inputTokens, outputTokens, cacheTokens, durationMs);
+  ).run(sessionId, model || "unknown", inputTokens, outputTokens, cacheTokens, durationMs);
 }
 
 export function insertGitOperation(
