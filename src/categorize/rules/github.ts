@@ -54,7 +54,7 @@ export async function fetchRulesFromGithub(path: string): Promise<string> {
   }
 
   // Fetch from GitHub
-  const url = `${RULES_REPO_URL}/${path}`;
+  const url = path.startsWith("http") ? path : `${RULES_REPO_URL}/${path}`;
   try {
     const response = await fetch(url);
     if (!response.ok) {

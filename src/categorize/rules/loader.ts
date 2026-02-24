@@ -9,6 +9,7 @@
 
 import { join } from "node:path";
 import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { fetchRulesFromGithub } from "./github";
 
@@ -155,7 +156,7 @@ export class RuleManager {
    */
   private getRuleFilePath(name: string): string {
     // Try local path first (for built-in rules) using URL for robust path resolution
-    const localPath = new URL(`./${name}.yml`, import.meta.url).pathname;
+    const localPath = fileURLToPath(new URL(`./${name}.yml`, import.meta.url));
 
     if (existsSync(localPath)) {
       return localPath;
