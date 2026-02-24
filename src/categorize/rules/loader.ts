@@ -154,15 +154,14 @@ export class RuleManager {
    * Get the filesystem or GitHub path for a rule file
    */
   private getRuleFilePath(name: string): string {
-    // Try local path first (for built-in rules)
-    // Use import.meta.url to get the current directory in Bun
-    const currentDir = import.meta.url.replace("file://", "").split("/").slice(0, -1).join("/");
-    const localPath = join(currentDir, `${name}.yml`);
+    // Try local path first (for built-in rules) using URL for robust path resolution
+    const localPath = new URL(`./${name}.yml`, import.meta.url).pathname;
+
     if (existsSync(localPath)) {
       return localPath;
     }
 
-    // Fall back to GitHub raw URL
+    // Fall back to GitHub raw URL if not found locally
     const RULES_REPO = "https://raw.githubusercontent.com/zero8dotdev/smriti-rules/main";
     return `${RULES_REPO}/${name}.yml`;
   }

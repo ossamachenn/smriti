@@ -41,7 +41,39 @@ export function closeDb(): void {
 
 /** Create all Smriti tables if they don't exist */
 export function initializeSmritiTables(db: Database): void {
-  // Migrate: Add columns to smriti_projects (language detection)
+  db.exec(`
+    -- Agent registry
+    CREATE TABLE IF NOT EXISTS smriti_agents (
+      id TEXT PRIMARY KEY,
+      display_name TEXT NOT NULL,
+      log_pattern TEXT,
+      parser TEXT NOT NULL
+    );
+
+    -- Project registry
+    CREATE TABLE IF NOT EXISTS smriti_projects (
+      id TEXT PRIMARY KEY,
+      path TEXT,
+      description TEXT,
+      language TEXT,
+      framework TEXT,
+      language_version TEXT,
+      detected_at TEXT,
+      rule_version TEXT DEFAULT '1.0.0',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Session metadata (maps to QMD's memory_sessions)
+    CREATE TABLE IF NOT EXISTS smriti_session_meta (
+      session_id TEXT PRIMARY KEY,
+      agent_id TEXT,
+      project_id TEXT,
+      FOREIGN KEY (agent_id) REFERENCES smriti_agents(id),
+      FOREIGN KEY (project_id) REFERENCES smriti_projects(id)
+    );
+  `);
+
+  // Migrations for existing installations
   try {
     db.exec(`ALTER TABLE smriti_projects ADD COLUMN language TEXT`);
   } catch {
@@ -68,7 +100,7 @@ export function initializeSmritiTables(db: Database): void {
     // Column already exists
   }
 
-  // Add columns to smriti_shares if they don't exist (migration)
+  // Migrate smriti_shares if they don't exist (migration)
   try {
     db.exec(`ALTER TABLE smriti_shares ADD COLUMN unit_id TEXT`);
   } catch {
@@ -120,31 +152,6 @@ export function initializeSmritiTables(db: Database): void {
   }
 
   db.exec(`
-    -- Agent registry
-    CREATE TABLE IF NOT EXISTS smriti_agents (
-      id TEXT PRIMARY KEY,
-      display_name TEXT NOT NULL,
-      log_pattern TEXT,
-      parser TEXT NOT NULL
-    );
-
-    -- Project registry
-    CREATE TABLE IF NOT EXISTS smriti_projects (
-      id TEXT PRIMARY KEY,
-      path TEXT,
-      description TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    -- Session metadata (maps to QMD's memory_sessions)
-    CREATE TABLE IF NOT EXISTS smriti_session_meta (
-      session_id TEXT PRIMARY KEY,
-      agent_id TEXT,
-      project_id TEXT,
-      FOREIGN KEY (agent_id) REFERENCES smriti_agents(id),
-      FOREIGN KEY (project_id) REFERENCES smriti_projects(id)
-    );
-
     -- Category taxonomy (hierarchical)
     CREATE TABLE IF NOT EXISTS smriti_categories (
       id TEXT PRIMARY KEY,
@@ -396,16 +403,16 @@ const DEFAULT_CATEGORIES: Array<{
 /** Seed agents and categories (idempotent) */
 export function seedDefaults(db: Database): void {
   const insertAgent = db.prepare(
-    `INSERT OR IGNORE INTO smriti_agents (id, display_name, log_pattern, parser)
-     VALUES (?, ?, ?, ?)`
+    `INSERT OR IGNORE INTO smriti_agents(id, display_name, log_pattern, parser)
+  VALUES(?, ?, ?, ?)`
   );
   for (const agent of DEFAULT_AGENTS) {
     insertAgent.run(agent.id, agent.display_name, agent.log_pattern, agent.parser);
   }
 
   const insertCategory = db.prepare(
-    `INSERT OR IGNORE INTO smriti_categories (id, name, parent_id, description)
-     VALUES (?, ?, ?, ?)`
+    `INSERT OR IGNORE INTO smriti_categories(id, name, parent_id, description)
+  VALUES(?, ?, ?, ?)`
   );
   for (const cat of DEFAULT_CATEGORIES) {
     insertCategory.run(cat.id, cat.name, cat.parent_id, cat.description);
@@ -440,16 +447,16 @@ export function upsertProject(
   ruleVersion?: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_projects (id, path, description, language, framework, language_version, rule_version, detected_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO smriti_projects(id, path, description, language, framework, language_version, rule_version, detected_at)
+  VALUES(?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
-       path = COALESCE(excluded.path, path),
-       description = COALESCE(excluded.description, description),
-       language = COALESCE(excluded.language, language),
-       framework = COALESCE(excluded.framework, framework),
-       language_version = COALESCE(excluded.language_version, language_version),
-       rule_version = COALESCE(excluded.rule_version, rule_version),
-       detected_at = COALESCE(excluded.detected_at, detected_at)`
+  path = COALESCE(excluded.path, path),
+    description = COALESCE(excluded.description, description),
+    language = COALESCE(excluded.language, language),
+    framework = COALESCE(excluded.framework, framework),
+    language_version = COALESCE(excluded.language_version, language_version),
+    rule_version = COALESCE(excluded.rule_version, rule_version),
+    detected_at = COALESCE(excluded.detected_at, detected_at)`
   ).run(
     id,
     path || null,
@@ -469,10 +476,10 @@ export function upsertSessionMeta(
   projectId?: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_session_meta (session_id, agent_id, project_id) VALUES (?, ?, ?)
+    `INSERT INTO smriti_session_meta(session_id, agent_id, project_id) VALUES(?, ?, ?)
      ON CONFLICT(session_id) DO UPDATE SET
-       agent_id = COALESCE(excluded.agent_id, agent_id),
-       project_id = COALESCE(excluded.project_id, project_id)`
+  agent_id = COALESCE(excluded.agent_id, agent_id),
+    project_id = COALESCE(excluded.project_id, project_id)`
   ).run(sessionId, agentId || null, projectId || null);
 }
 
@@ -484,8 +491,8 @@ export function tagMessage(
   source: string = "manual"
 ): void {
   db.prepare(
-    `INSERT OR REPLACE INTO smriti_message_tags (message_id, category_id, confidence, source)
-     VALUES (?, ?, ?, ?)`
+    `INSERT OR REPLACE INTO smriti_message_tags(message_id, category_id, confidence, source)
+  VALUES(?, ?, ?, ?)`
   ).run(messageId, categoryId, confidence, source);
 }
 
@@ -497,8 +504,8 @@ export function tagSession(
   source: string = "manual"
 ): void {
   db.prepare(
-    `INSERT OR REPLACE INTO smriti_session_tags (session_id, category_id, confidence, source)
-     VALUES (?, ?, ?, ?)`
+    `INSERT OR REPLACE INTO smriti_session_tags(session_id, category_id, confidence, source)
+  VALUES(?, ?, ?, ?)`
   ).run(sessionId, categoryId, confidence, source);
 }
 
@@ -511,7 +518,7 @@ export function getCategories(db: Database, parentId?: string): Array<{
   if (parentId !== undefined) {
     return db
       .prepare(
-        `SELECT id, name, parent_id, description FROM smriti_categories WHERE parent_id = ?`
+        `SELECT id, name, parent_id, description FROM smriti_categories WHERE parent_id = ? `
       )
       .all(parentId) as any;
   }
@@ -549,7 +556,7 @@ export function addCategory(
   description?: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_categories (id, name, parent_id, description) VALUES (?, ?, ?, ?)`
+    `INSERT INTO smriti_categories(id, name, parent_id, description) VALUES(?, ?, ?, ?)`
   ).run(id, name, parentId || null, description || null);
 }
 
@@ -586,8 +593,8 @@ export function insertToolUsage(
   createdAt: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_tool_usage (message_id, session_id, tool_name, input_summary, success, duration_ms, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO smriti_tool_usage(message_id, session_id, tool_name, input_summary, success, duration_ms, created_at)
+  VALUES(?, ?, ?, ?, ?, ?, ?)`
   ).run(messageId, sessionId, toolName, inputSummary, success ? 1 : 0, durationMs, createdAt);
 }
 
@@ -601,8 +608,8 @@ export function insertFileOperation(
   createdAt: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_file_operations (message_id, session_id, operation, file_path, project_id, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`
+    `INSERT INTO smriti_file_operations(message_id, session_id, operation, file_path, project_id, created_at)
+  VALUES(?, ?, ?, ?, ?, ?)`
   ).run(messageId, sessionId, operation, filePath, projectId, createdAt);
 }
 
@@ -617,8 +624,8 @@ export function insertCommand(
   createdAt: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_commands (message_id, session_id, command, exit_code, cwd, is_git, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO smriti_commands(message_id, session_id, command, exit_code, cwd, is_git, created_at)
+  VALUES(?, ?, ?, ?, ?, ?, ?)`
   ).run(messageId, sessionId, command, exitCode, cwd, isGit ? 1 : 0, createdAt);
 }
 
@@ -631,8 +638,8 @@ export function insertError(
   createdAt: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_errors (message_id, session_id, error_type, message, created_at)
-     VALUES (?, ?, ?, ?, ?)`
+    `INSERT INTO smriti_errors(message_id, session_id, error_type, message, created_at)
+  VALUES(?, ?, ?, ?, ?)`
   ).run(messageId, sessionId, errorType, message, createdAt);
 }
 
@@ -646,14 +653,14 @@ export function upsertSessionCosts(
   durationMs: number
 ): void {
   db.prepare(
-    `INSERT INTO smriti_session_costs (session_id, model, total_input_tokens, total_output_tokens, total_cache_tokens, turn_count, total_duration_ms)
-     VALUES (?, ?, ?, ?, ?, 1, ?)
+    `INSERT INTO smriti_session_costs(session_id, model, total_input_tokens, total_output_tokens, total_cache_tokens, turn_count, total_duration_ms)
+  VALUES(?, ?, ?, ?, ?, 1, ?)
      ON CONFLICT(session_id, model) DO UPDATE SET
-       total_input_tokens = total_input_tokens + excluded.total_input_tokens,
-       total_output_tokens = total_output_tokens + excluded.total_output_tokens,
-       total_cache_tokens = total_cache_tokens + excluded.total_cache_tokens,
-       turn_count = turn_count + 1,
-       total_duration_ms = total_duration_ms + excluded.total_duration_ms`
+  total_input_tokens = total_input_tokens + excluded.total_input_tokens,
+    total_output_tokens = total_output_tokens + excluded.total_output_tokens,
+    total_cache_tokens = total_cache_tokens + excluded.total_cache_tokens,
+    turn_count = turn_count + 1,
+    total_duration_ms = total_duration_ms + excluded.total_duration_ms`
   ).run(sessionId, model || "unknown", inputTokens, outputTokens, cacheTokens, durationMs);
 }
 
@@ -669,7 +676,7 @@ export function insertGitOperation(
   createdAt: string
 ): void {
   db.prepare(
-    `INSERT INTO smriti_git_operations (message_id, session_id, operation, branch, pr_url, pr_number, details, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO smriti_git_operations(message_id, session_id, operation, branch, pr_url, pr_number, details, created_at)
+  VALUES(?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(messageId, sessionId, operation, branch, prUrl, prNumber, details, createdAt);
 }

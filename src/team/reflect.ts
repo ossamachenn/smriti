@@ -31,11 +31,10 @@ export type Synthesis = {
 // Prompt loading
 // =============================================================================
 
-const DEFAULT_PROMPT_PATH = join(
-  dirname(new URL(import.meta.url).pathname),
-  "prompts",
-  "share-reflect.md"
-);
+const DEFAULT_PROMPT_PATH = new URL(
+  "./prompts/share-reflect.md",
+  import.meta.url
+).pathname;
 
 /** Load the prompt template, preferring project override */
 export async function loadPromptTemplate(
