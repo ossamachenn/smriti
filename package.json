@@ -2,9 +2,6 @@
   "name": "smriti",
   "version": "0.2.0",
   "description": "Smriti - Unified memory layer across all AI agents",
-  "workspaces": [
-    "website"
-  ],
   "type": "module",
   "bin": {
     "smriti": "./src/index.ts"
@@ -13,12 +10,7 @@
     "dev": "bun --hot src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",
     "test": "bun test",
-    "smriti": "bun src/index.ts",
-    "site:dev": "bun --cwd website run dev",
-    "site:build": "bun --cwd website run build",
-    "site:start": "bun --cwd website run start",
-    "site:lint": "bun --cwd website run lint",
-    "site:check-content": "bun --cwd website run content:check"
+    "smriti": "bun src/index.ts"
   },
   "dependencies": {
     "node-llama-cpp": "^3.0.0",
